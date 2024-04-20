@@ -9,11 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-/*
 
-eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImludmVzdG9yNEBnbWFpbC5jb20iLCJnaXZlbl9uYW1lIjoiaW52ZXN0b3I0IiwibmJmIjoxNzEzNDM3OTg2LCJleHAiOjE3MTQwNDI3ODYsImlhdCI6MTcxMzQzNzk4NiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MjQ2IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MjQ2In0.kLAti_dTWPIa5LlY7yQRNsfLGJh8-6ehHLoabbF9708BOJgb_sabfrgPOLeuwo5xKGDKbqpQ1znH3LY-GKcXcQ
-
-*/
 namespace api.Controllers
 {
     [Route("api/account")]
