@@ -36,12 +36,54 @@ namespace api.Controllers
         public async Task<IActionResult> GetUserPortfolio()
         {
             var username = User.GetUsername();
+            if (username == null)
+            {
+                return StatusCode(500, "Failed to get username");
+            }
             var appUser = await _userManager.FindByNameAsync(username);
-            if (appUser == null) {
+            if (appUser == null)
+            {
                 return NotFound("Cannot find user");
-             }
+            }
             var userPortfolio = await _portfolioRepository.GetUserPortfolio(appUser);
             return Ok(userPortfolio);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AddPortfolio(string symbol)
+        {
+            var username = User.GetUsername();
+            if (username == null)
+            {
+                return StatusCode(500, "Failed to get username");
+            }
+            var appUser = await _userManager.FindByNameAsync(username);
+            if (appUser == null)
+            {
+                return StatusCode(500, "Cannot find user");
+            }
+            var stock = await _stockRepository.GetBySymbolAsync(symbol);
+            if (stock == null)
+            {
+                return NotFound("Stock not found");
+            }
+            var userPortfolio = await _portfolioRepository.GetUserPortfolio(appUser);
+            if (
+                userPortfolio.Any(
+                    x => x.Symbol.Equals(symbol, StringComparison.CurrentCultureIgnoreCase)
+                )
+            )
+            {
+                return BadRequest("Cannot add same stock to portfolio");
+            }
+            var portfolioModel = new Portfolio { StockId = stock.Id, AppUserId = appUser.Id };
+            var createResult = await _portfolioRepository.CreateAsync(portfolioModel);
+            if (createResult == null)
+            {
+                return StatusCode(500, "Could not create portfolio");
+            }
+            return Created();
         }
     }
 }
