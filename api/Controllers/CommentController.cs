@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Dtos.Comment;
+using api.Extensions;
 using api.Interfaces;
 using api.Mappers;
+using api.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -15,14 +19,17 @@ namespace api.Controllers
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IStockRepository _stockRepository;
+        private readonly UserManager<AppUser> _userManager;
 
         public CommentController(
             ICommentRepository commentRepository,
-            IStockRepository stockRepository
+            IStockRepository stockRepository,
+            UserManager<AppUser> userManager
         )
         {
             _commentRepository = commentRepository;
             _stockRepository = stockRepository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -44,6 +51,7 @@ namespace api.Controllers
             return Ok(comment.ToCommentDto());
         }
 
+        [Authorize]
         [HttpPost("{stockId:int}")]
         public async Task<IActionResult> Create(
             [FromRoute] int stockId,
@@ -54,7 +62,20 @@ namespace api.Controllers
             {
                 return BadRequest("Stock does not exists");
             }
+
+            var username = User.GetUsername();
+            if (username == null)
+            {
+                return StatusCode(500, "Could not find username");
+            }
+            var appUser = await _userManager.FindByNameAsync(username);
+            if (appUser == null)
+            {
+                return StatusCode(500, "Could not find appUser from username");
+            }
             var commentModel = commentDto.ToCommentFromCreate(stockId);
+            commentModel.AppUserId = appUser.Id;
+            
             await _commentRepository.CreateAsync(commentModel);
             return CreatedAtAction(
                 nameof(GetById),
